@@ -106,6 +106,7 @@ export type Database = {
           content: string
           created_at: string
           description: string | null
+          folder_id: string | null
           id: string
           is_public: boolean | null
           slug: string
@@ -119,6 +120,7 @@ export type Database = {
           content: string
           created_at?: string
           description?: string | null
+          folder_id?: string | null
           id?: string
           is_public?: boolean | null
           slug: string
@@ -132,6 +134,7 @@ export type Database = {
           content?: string
           created_at?: string
           description?: string | null
+          folder_id?: string | null
           id?: string
           is_public?: boolean | null
           slug?: string
@@ -140,7 +143,62 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_base_documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_base_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_base_folders: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          parent_id: string | null
+          slug: string
+          sort_order: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_base_folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_base_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_revisions: {
         Row: {
