@@ -1,0 +1,184 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { WizardProgress, WizardStep } from './WizardProgress';
+import { CompanyInfoStep } from './steps/CompanyInfoStep';
+import { BrandingStep } from './steps/BrandingStep';
+import { ServicesStep } from './steps/ServicesStep';
+import { TeamStep } from './steps/TeamStep';
+import { ComplianceStep } from './steps/ComplianceStep';
+import { EnterpriseProfile, useUpdateProfile } from '@/hooks/useProfiles';
+import { Building2, Palette, Briefcase, Users, Shield, ArrowLeft, ArrowRight, Save, Eye, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface ProfileWizardProps {
+  profile: EnterpriseProfile;
+}
+
+const wizardSteps: WizardStep[] = [
+  { id: 'company', title: 'Company Info', description: 'Basic details', icon: <Building2 className="h-5 w-5" /> },
+  { id: 'branding', title: 'Branding', description: 'Colors & assets', icon: <Palette className="h-5 w-5" /> },
+  { id: 'services', title: 'Services', description: 'What you offer', icon: <Briefcase className="h-5 w-5" /> },
+  { id: 'team', title: 'Team', description: 'Key personnel', icon: <Users className="h-5 w-5" /> },
+  { id: 'compliance', title: 'Compliance', description: 'Certifications', icon: <Shield className="h-5 w-5" /> },
+];
+
+export function ProfileWizard({ profile }: ProfileWizardProps) {
+  const navigate = useNavigate();
+  const updateProfile = useUpdateProfile();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [saving, setSaving] = useState(false);
+
+  // Local state for each section
+  const [companyInfo, setCompanyInfo] = useState<Record<string, any>>(profile.company_info || {});
+  const [branding, setBranding] = useState<Record<string, any>>(profile.branding || {});
+  const [services, setServices] = useState<any[]>(profile.services || []);
+  const [team, setTeam] = useState<any[]>(profile.team || []);
+  const [compliance, setCompliance] = useState<Record<string, any>>(profile.compliance || {});
+
+  // Update local state when profile changes
+  useEffect(() => {
+    setCompanyInfo(profile.company_info || {});
+    setBranding(profile.branding || {});
+    setServices(profile.services || []);
+    setTeam(profile.team || []);
+    setCompliance(profile.compliance || {});
+  }, [profile]);
+
+  const saveProgress = async () => {
+    setSaving(true);
+    try {
+      await updateProfile.mutateAsync({
+        id: profile.id,
+        updates: {
+          company_info: companyInfo,
+          branding,
+          services,
+          team,
+          compliance,
+        },
+      });
+      toast.success('Progress saved');
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleNext = async () => {
+    await saveProgress();
+    if (currentStep < wizardSteps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handlePreview = async () => {
+    await saveProgress();
+    navigate(`/profile/${profile.id}/preview`);
+  };
+
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 0:
+        return <CompanyInfoStep data={companyInfo} onChange={setCompanyInfo} />;
+      case 1:
+        return <BrandingStep data={branding} onChange={setBranding} />;
+      case 2:
+        return <ServicesStep data={services} onChange={setServices} />;
+      case 3:
+        return <TeamStep data={team} onChange={setTeam} />;
+      case 4:
+        return <ComplianceStep data={compliance} onChange={setCompliance} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-24 pt-20">
+      <div className="container max-w-4xl">
+        {/* Header */}
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/dashboard')}
+            className="mb-4"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          <h1 className="font-display text-3xl font-bold">{profile.name}</h1>
+          <p className="mt-1 text-muted-foreground">
+            Complete each section to build your enterprise profile
+          </p>
+        </div>
+
+        {/* Progress */}
+        <WizardProgress
+          steps={wizardSteps}
+          currentStep={currentStep}
+          onStepClick={setCurrentStep}
+        />
+
+        {/* Current Step Content */}
+        <div className="animate-fade-in">
+          {renderCurrentStep()}
+        </div>
+
+        {/* Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur">
+          <div className="container flex max-w-4xl items-center justify-between py-4">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentStep === 0}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={saveProgress}
+                disabled={saving}
+              >
+                {saving ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                Save
+              </Button>
+
+              {currentStep === wizardSteps.length - 1 ? (
+                <Button
+                  onClick={handlePreview}
+                  className="primary-gradient border-0"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  Preview & Publish
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleNext}
+                  className="primary-gradient border-0"
+                >
+                  Next
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
