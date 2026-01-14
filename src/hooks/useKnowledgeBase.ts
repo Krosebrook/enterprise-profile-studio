@@ -3,6 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
+export interface KnowledgeFolder {
+  id: string;
+  user_id: string;
+  name: string;
+  slug: string;
+  parent_id: string | null;
+  color: string;
+  icon: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface KnowledgeDocument {
   id: string;
   user_id: string;
@@ -13,6 +26,7 @@ export interface KnowledgeDocument {
   category: string;
   tags: string[];
   is_public: boolean;
+  folder_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -25,10 +39,19 @@ export interface CreateDocumentData {
   category?: string;
   tags?: string[];
   is_public?: boolean;
+  folder_id?: string | null;
 }
 
 export interface UpdateDocumentData extends Partial<CreateDocumentData> {
   id: string;
+}
+
+export interface CreateFolderData {
+  name: string;
+  slug: string;
+  parent_id?: string | null;
+  color?: string;
+  icon?: string;
 }
 
 // Generate slug from title
@@ -268,6 +291,144 @@ export function useBulkImportDocuments() {
         description: error.message,
         variant: 'destructive',
       });
+    },
+  });
+}
+
+// ========== FOLDER OPERATIONS ==========
+
+// Fetch all folders for the current user
+export function useKnowledgeFolders() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['knowledge-folders', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('knowledge_base_folders')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data as KnowledgeFolder[];
+    },
+    enabled: !!user,
+  });
+}
+
+// Create a new folder
+export function useCreateFolder() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (data: CreateFolderData) => {
+      if (!user) throw new Error('User not authenticated');
+
+      const { data: newFolder, error } = await supabase
+        .from('knowledge_base_folders')
+        .insert({
+          ...data,
+          user_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return newFolder as KnowledgeFolder;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledge-folders'] });
+      toast({
+        title: 'Folder created',
+        description: 'Your folder has been created.',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Failed to create folder',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+// Update a folder
+export function useUpdateFolder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: { id: string } & Partial<CreateFolderData>) => {
+      const { data: updated, error } = await supabase
+        .from('knowledge_base_folders')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return updated as KnowledgeFolder;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledge-folders'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Failed to update folder',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+// Delete a folder
+export function useDeleteFolder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('knowledge_base_folders')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledge-folders'] });
+      queryClient.invalidateQueries({ queryKey: ['knowledge-documents'] });
+      toast({
+        title: 'Folder deleted',
+        description: 'The folder has been removed.',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Failed to delete folder',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+// Move document to folder
+export function useMoveDocumentToFolder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ documentId, folderId }: { documentId: string; folderId: string | null }) => {
+      const { error } = await supabase
+        .from('knowledge_base_documents')
+        .update({ folder_id: folderId })
+        .eq('id', documentId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledge-documents'] });
     },
   });
 }
