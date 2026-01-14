@@ -1,0 +1,156 @@
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Palette, Image } from 'lucide-react';
+
+interface BrandingStepProps {
+  data: Record<string, any>;
+  onChange: (data: Record<string, any>) => void;
+}
+
+export function BrandingStep({ data, onChange }: BrandingStepProps) {
+  const handleChange = (field: string, value: string) => {
+    onChange({ ...data, [field]: value });
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="border-border/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-display">
+            <Palette className="h-5 w-5 text-primary" />
+            Brand Colors
+          </CardTitle>
+          <CardDescription>
+            Define your brand's color palette
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="primaryColor">Primary Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="primaryColor"
+                  type="color"
+                  className="h-10 w-14 cursor-pointer p-1"
+                  value={data.primaryColor || '#3B82F6'}
+                  onChange={(e) => handleChange('primaryColor', e.target.value)}
+                />
+                <Input
+                  type="text"
+                  placeholder="#3B82F6"
+                  value={data.primaryColor || '#3B82F6'}
+                  onChange={(e) => handleChange('primaryColor', e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="secondaryColor">Secondary Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="secondaryColor"
+                  type="color"
+                  className="h-10 w-14 cursor-pointer p-1"
+                  value={data.secondaryColor || '#8B5CF6'}
+                  onChange={(e) => handleChange('secondaryColor', e.target.value)}
+                />
+                <Input
+                  type="text"
+                  placeholder="#8B5CF6"
+                  value={data.secondaryColor || '#8B5CF6'}
+                  onChange={(e) => handleChange('secondaryColor', e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="accentColor">Accent Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="accentColor"
+                  type="color"
+                  className="h-10 w-14 cursor-pointer p-1"
+                  value={data.accentColor || '#10B981'}
+                  onChange={(e) => handleChange('accentColor', e.target.value)}
+                />
+                <Input
+                  type="text"
+                  placeholder="#10B981"
+                  value={data.accentColor || '#10B981'}
+                  onChange={(e) => handleChange('accentColor', e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Color Preview */}
+          <div className="mt-4 rounded-lg border border-border p-4">
+            <p className="mb-3 text-sm font-medium text-muted-foreground">Preview</p>
+            <div className="flex gap-4">
+              <div 
+                className="h-16 w-16 rounded-lg shadow-md transition-transform hover:scale-105"
+                style={{ backgroundColor: data.primaryColor || '#3B82F6' }}
+              />
+              <div 
+                className="h-16 w-16 rounded-lg shadow-md transition-transform hover:scale-105"
+                style={{ backgroundColor: data.secondaryColor || '#8B5CF6' }}
+              />
+              <div 
+                className="h-16 w-16 rounded-lg shadow-md transition-transform hover:scale-105"
+                style={{ backgroundColor: data.accentColor || '#10B981' }}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-display">
+            <Image className="h-5 w-5 text-primary" />
+            Brand Assets
+          </CardTitle>
+          <CardDescription>
+            Add your logo and other brand assets
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="logoUrl">Logo URL</Label>
+            <Input
+              id="logoUrl"
+              type="url"
+              placeholder="https://example.com/logo.png"
+              value={data.logoUrl || ''}
+              onChange={(e) => handleChange('logoUrl', e.target.value)}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="coverUrl">Cover Image URL</Label>
+            <Input
+              id="coverUrl"
+              type="url"
+              placeholder="https://example.com/cover.jpg"
+              value={data.coverUrl || ''}
+              onChange={(e) => handleChange('coverUrl', e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="brandFonts">Brand Fonts</Label>
+            <Input
+              id="brandFonts"
+              placeholder="Inter, Roboto, Open Sans..."
+              value={data.brandFonts || ''}
+              onChange={(e) => handleChange('brandFonts', e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
