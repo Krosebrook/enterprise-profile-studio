@@ -1,5 +1,41 @@
 // Deal types for the application
 
+// Pipeline stages for deal tracking
+export const PIPELINE_STAGES = [
+  'screening',
+  'initial_review', 
+  'due_diligence',
+  'negotiation',
+  'term_sheet',
+  'closing',
+  'closed',
+  'passed',
+] as const;
+
+export type PipelineStage = typeof PIPELINE_STAGES[number];
+
+export const PIPELINE_STAGE_LABELS: Record<PipelineStage, string> = {
+  screening: 'Screening',
+  initial_review: 'Initial Review',
+  due_diligence: 'Due Diligence',
+  negotiation: 'Negotiation',
+  term_sheet: 'Term Sheet',
+  closing: 'Closing',
+  closed: 'Closed',
+  passed: 'Passed',
+};
+
+export const PIPELINE_STAGE_COLORS: Record<PipelineStage, string> = {
+  screening: 'bg-slate-500',
+  initial_review: 'bg-blue-500',
+  due_diligence: 'bg-amber-500',
+  negotiation: 'bg-purple-500',
+  term_sheet: 'bg-indigo-500',
+  closing: 'bg-orange-500',
+  closed: 'bg-green-500',
+  passed: 'bg-red-500',
+};
+
 export interface Deal {
   id: string;
   name: string;
@@ -13,6 +49,55 @@ export interface Deal {
   metrics: DealMetrics;
   team: DealTeam;
   timeline: DealTimeline;
+  // Pipeline tracking
+  pipelineStage: PipelineStage;
+  pipelineHistory?: PipelineHistoryEntry[];
+  // Investment memo and documents
+  investmentMemo?: InvestmentMemo;
+  documents?: DealDocument[];
+  dueDiligenceChecklist?: DueDiligenceItem[];
+}
+
+export interface PipelineHistoryEntry {
+  stage: PipelineStage;
+  enteredAt: string;
+  exitedAt?: string;
+  notes?: string;
+}
+
+export interface InvestmentMemo {
+  summary: string;
+  thesis: string;
+  keyRisks: string[];
+  keyOpportunities: string[];
+  competitiveAdvantage: string;
+  marketAnalysis: string;
+  useOfFunds: string;
+  exitStrategy: string;
+  recommendation: 'strong_buy' | 'buy' | 'hold' | 'pass';
+  preparedBy?: string;
+  preparedAt?: string;
+}
+
+export interface DealDocument {
+  id: string;
+  name: string;
+  type: 'pitch_deck' | 'financials' | 'legal' | 'technical' | 'market_research' | 'other';
+  url?: string;
+  uploadedAt: string;
+  size?: string;
+}
+
+export interface DueDiligenceItem {
+  id: string;
+  category: 'financial' | 'legal' | 'technical' | 'commercial' | 'operational';
+  title: string;
+  description?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'flagged';
+  assignee?: string;
+  dueDate?: string;
+  completedAt?: string;
+  notes?: string;
 }
 
 export interface DealMetrics {
@@ -89,6 +174,7 @@ export const generateFullMockDeals = (): Deal[] => [
     match: 95,
     trending: true,
     description: 'AI-powered enterprise automation platform',
+    pipelineStage: 'due_diligence',
     metrics: {
       revenue: 1200000,
       revenueGrowth: 180,
@@ -111,6 +197,32 @@ export const generateFullMockDeals = (): Deal[] => [
       targetClose: '2024-03-31',
       dueDiligencePhase: 'detailed',
     },
+    investmentMemo: {
+      summary: 'TechVenture AI is an enterprise automation platform leveraging proprietary AI models to streamline business processes.',
+      thesis: 'The AI enterprise automation market is projected to grow at 35% CAGR. TechVenture has demonstrated strong product-market fit with 180% YoY revenue growth and 75% gross margins.',
+      keyRisks: ['High customer concentration (top 5 = 60%)', 'Competitive pressure from well-funded players', 'Execution risk on enterprise sales cycle'],
+      keyOpportunities: ['Expansion into adjacent verticals', 'Strong upsell motion with existing customers', 'Partnership opportunities with system integrators'],
+      competitiveAdvantage: 'Proprietary AI models trained on domain-specific data with 40% better accuracy than competitors.',
+      marketAnalysis: 'TAM of $50B with 35% CAGR. The company targets mid-market enterprises with 500-5000 employees.',
+      useOfFunds: '60% R&D, 30% Sales & Marketing, 10% G&A',
+      exitStrategy: 'Strategic acquisition by enterprise software company or IPO in 5-7 years',
+      recommendation: 'buy',
+      preparedBy: 'Investment Team',
+      preparedAt: '2024-01-15',
+    },
+    documents: [
+      { id: 'd1', name: 'Pitch Deck Q4 2023', type: 'pitch_deck', uploadedAt: '2024-01-10', size: '4.2 MB' },
+      { id: 'd2', name: 'Financial Model', type: 'financials', uploadedAt: '2024-01-12', size: '1.8 MB' },
+      { id: 'd3', name: 'Technical Architecture', type: 'technical', uploadedAt: '2024-01-14', size: '2.1 MB' },
+    ],
+    dueDiligenceChecklist: [
+      { id: 'dd1', category: 'financial', title: 'Revenue Verification', status: 'completed', completedAt: '2024-01-20' },
+      { id: 'dd2', category: 'financial', title: 'Cash Flow Analysis', status: 'completed', completedAt: '2024-01-22' },
+      { id: 'dd3', category: 'legal', title: 'IP Review', status: 'in_progress', assignee: 'Legal Team' },
+      { id: 'dd4', category: 'technical', title: 'Tech Stack Assessment', status: 'completed', completedAt: '2024-01-18' },
+      { id: 'dd5', category: 'commercial', title: 'Customer Reference Calls', status: 'in_progress', assignee: 'Deal Lead' },
+      { id: 'dd6', category: 'operational', title: 'Management Assessment', status: 'pending', dueDate: '2024-02-01' },
+    ],
   },
   {
     id: '2',
@@ -121,6 +233,7 @@ export const generateFullMockDeals = (): Deal[] => [
     match: 88,
     trending: false,
     description: 'Digital health infrastructure for hospitals',
+    pipelineStage: 'negotiation',
     metrics: {
       revenue: 8500000,
       revenueGrowth: 95,
@@ -143,6 +256,26 @@ export const generateFullMockDeals = (): Deal[] => [
       targetClose: '2024-04-15',
       dueDiligencePhase: 'final',
     },
+    investmentMemo: {
+      summary: 'HealthCore provides essential digital infrastructure for hospitals, enabling seamless data integration across healthcare systems.',
+      thesis: 'Healthcare digitization is accelerating post-COVID. HealthCore has strong customer retention (95%+) and regulatory moats.',
+      keyRisks: ['Long sales cycles', 'Regulatory compliance complexity', 'Integration challenges'],
+      keyOpportunities: ['Medicare mandates driving adoption', 'Expansion to outpatient facilities', 'International markets'],
+      competitiveAdvantage: 'HIPAA-compliant platform with proven integrations to 50+ EHR systems.',
+      marketAnalysis: 'Healthcare IT market is $250B with strong tailwinds from government mandates.',
+      useOfFunds: '50% Sales, 35% R&D, 15% Operations',
+      exitStrategy: 'Strategic acquisition by major healthcare IT company',
+      recommendation: 'strong_buy',
+    },
+    documents: [
+      { id: 'd4', name: 'Series B Deck', type: 'pitch_deck', uploadedAt: '2024-01-08', size: '5.1 MB' },
+      { id: 'd5', name: 'Audited Financials 2023', type: 'financials', uploadedAt: '2024-01-15', size: '3.2 MB' },
+    ],
+    dueDiligenceChecklist: [
+      { id: 'dd7', category: 'financial', title: 'Audit Review', status: 'completed' },
+      { id: 'dd8', category: 'legal', title: 'HIPAA Compliance', status: 'completed' },
+      { id: 'dd9', category: 'commercial', title: 'Market Analysis', status: 'completed' },
+    ],
   },
   {
     id: '3',
@@ -153,6 +286,7 @@ export const generateFullMockDeals = (): Deal[] => [
     match: 82,
     trending: true,
     description: 'Renewable energy storage technology',
+    pipelineStage: 'screening',
     metrics: {
       revenue: 22000000,
       revenueGrowth: 65,
@@ -184,6 +318,7 @@ export const generateFullMockDeals = (): Deal[] => [
     match: 78,
     trending: false,
     description: 'B2B payments infrastructure',
+    pipelineStage: 'term_sheet',
     metrics: {
       revenue: 45000000,
       revenueGrowth: 55,
@@ -206,6 +341,25 @@ export const generateFullMockDeals = (): Deal[] => [
       targetClose: '2024-05-15',
       dueDiligencePhase: 'detailed',
     },
+    investmentMemo: {
+      summary: 'FinServe is a B2B payments platform processing $2B+ in annual volume.',
+      thesis: 'Strong network effects and high switching costs create defensible moat.',
+      keyRisks: ['Regulatory changes', 'Fraud risk', 'Large incumbent competition'],
+      keyOpportunities: ['Cross-border expansion', 'Embedded finance', 'SMB market penetration'],
+      competitiveAdvantage: 'Lowest transaction fees with 99.99% uptime SLA.',
+      marketAnalysis: 'B2B payments is a $125T market with less than 1% digitization.',
+      useOfFunds: '40% International expansion, 40% Product, 20% Compliance',
+      exitStrategy: 'IPO or acquisition by major fintech',
+      recommendation: 'buy',
+    },
+    documents: [
+      { id: 'd6', name: 'Term Sheet Draft', type: 'legal', uploadedAt: '2024-01-25', size: '0.5 MB' },
+    ],
+    dueDiligenceChecklist: [
+      { id: 'dd10', category: 'financial', title: 'Full Audit', status: 'completed' },
+      { id: 'dd11', category: 'legal', title: 'Regulatory Review', status: 'completed' },
+      { id: 'dd12', category: 'technical', title: 'Security Audit', status: 'completed' },
+    ],
   },
   {
     id: '5',
@@ -216,6 +370,7 @@ export const generateFullMockDeals = (): Deal[] => [
     match: 75,
     trending: true,
     description: 'Omnichannel retail analytics',
+    pipelineStage: 'initial_review',
     metrics: {
       revenue: 2500000,
       revenueGrowth: 120,
@@ -248,6 +403,7 @@ export const generateFullMockDeals = (): Deal[] => [
     match: 72,
     trending: false,
     description: 'AI-powered supply chain optimization',
+    pipelineStage: 'closed',
     metrics: {
       revenue: 12000000,
       revenueGrowth: 85,

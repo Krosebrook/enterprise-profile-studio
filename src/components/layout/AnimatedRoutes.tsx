@@ -14,6 +14,8 @@ import KnowledgeDocumentPage from '@/pages/KnowledgeDocumentPage';
 import KnowledgeEditorPage from '@/pages/KnowledgeEditorPage';
 import OnboardingPage from '@/pages/OnboardingPage';
 import DealComparisonPage from '@/pages/DealComparisonPage';
+import DealDetailPage from '@/pages/DealDetailPage';
+import DealPipelinePage from '@/pages/DealPipelinePage';
 import NotFound from '@/pages/NotFound';
 
 export function AnimatedRoutes() {
@@ -67,6 +69,22 @@ export function AnimatedRoutes() {
           element={
             <PageTransition>
               <DealComparisonPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/deals/pipeline"
+          element={
+            <PageTransition>
+              <DealPipelinePage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/deals/:id"
+          element={
+            <PageTransition>
+              <DealDetailPage />
             </PageTransition>
           }
         />
