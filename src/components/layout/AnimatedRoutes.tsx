@@ -16,6 +16,7 @@ import OnboardingPage from '@/pages/OnboardingPage';
 import DealComparisonPage from '@/pages/DealComparisonPage';
 import DealDetailPage from '@/pages/DealDetailPage';
 import DealPipelinePage from '@/pages/DealPipelinePage';
+import DealAnalyticsPage from '@/pages/DealAnalyticsPage';
 import NotFound from '@/pages/NotFound';
 
 export function AnimatedRoutes() {
@@ -85,6 +86,14 @@ export function AnimatedRoutes() {
           element={
             <PageTransition>
               <DealDetailPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/deals/analytics"
+          element={
+            <PageTransition>
+              <DealAnalyticsPage />
             </PageTransition>
           }
         />
