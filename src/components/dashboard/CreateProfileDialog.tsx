@@ -17,8 +17,15 @@ import { profileTemplates, type ProfileTemplate } from '@/data/profileTemplates'
 import { Plus, Loader2, ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export function CreateProfileDialog() {
-  const [open, setOpen] = useState(false);
+interface CreateProfileDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function CreateProfileDialog({ open: controlledOpen, onOpenChange }: CreateProfileDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [step, setStep] = useState<'template' | 'name'>('template');
   const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate | null>(null);
   const [name, setName] = useState('');

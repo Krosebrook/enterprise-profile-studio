@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { CommandPalette } from "@/components/ui/CommandPalette";
+import { KeyboardShortcutsHelp } from "@/components/ui/KeyboardShortcutsHelp";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <CommandPalette />
+          <KeyboardShortcutsHelp />
           <AnimatedRoutes />
         </BrowserRouter>
       </TooltipProvider>

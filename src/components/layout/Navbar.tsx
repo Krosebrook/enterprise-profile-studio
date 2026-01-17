@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { KeyboardShortcutsHelp } from '@/components/ui/KeyboardShortcutsHelp';
 
 export function Navbar() {
   const { user, signOut } = useAuth();
@@ -54,6 +55,7 @@ export function Navbar() {
                 </Link>
               </Button>
               <div className="ml-1 h-6 w-px bg-border" />
+              <KeyboardShortcutsHelp />
               <ThemeToggle />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
