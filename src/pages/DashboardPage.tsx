@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfiles, useDeleteProfile } from '@/hooks/useProfiles';
 import { Loader2, BarChart3, Sparkles, Command } from 'lucide-react';
 import { StaggerContainer, StaggerItem, FadeIn } from '@/components/ui/animations';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +27,17 @@ export default function DashboardPage() {
   const { data: profiles, isLoading: profilesLoading } = useProfiles();
   const deleteProfile = useDeleteProfile();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Enable keyboard shortcuts
+  useKeyboardShortcuts();
+  
+  // Listen for shortcut to open new profile dialog
+  useEffect(() => {
+    const handleNewProfile = () => setDialogOpen(true);
+    window.addEventListener('shortcut:new-profile', handleNewProfile);
+    return () => window.removeEventListener('shortcut:new-profile', handleNewProfile);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -79,7 +91,7 @@ export default function DashboardPage() {
                     Analytics
                   </Link>
                 </Button>
-                <CreateProfileDialog />
+                <CreateProfileDialog open={dialogOpen} onOpenChange={setDialogOpen} />
               </div>
             </div>
           </FadeIn>
@@ -106,7 +118,7 @@ export default function DashboardPage() {
                 <p className="mb-6 text-muted-foreground max-w-sm text-center">
                   Create your first enterprise profile to showcase your company
                 </p>
-                <CreateProfileDialog />
+                <CreateProfileDialog open={dialogOpen} onOpenChange={setDialogOpen} />
               </div>
             </FadeIn>
           )}

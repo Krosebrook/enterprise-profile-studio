@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfiles, EnterpriseProfile } from '@/hooks/useProfiles';
 import { useProfileAnalytics, AnalyticsData } from '@/hooks/useProfileAnalytics';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import {
   LineChart,
   Line,
@@ -118,6 +119,9 @@ export default function AnalyticsDashboardPage() {
   const [selectedProfileId, setSelectedProfileId] = useState<string | undefined>();
   const [activeTab, setActiveTab] = useState<'single' | 'compare'>('single');
   const [comparisonIds, setComparisonIds] = useState<string[]>([]);
+  
+  // Enable keyboard shortcuts
+  useKeyboardShortcuts();
   
   const { data: analytics, isLoading: analyticsLoading, refetch } = useProfileAnalytics(selectedProfileId);
   const { data: comparisonData, isLoading: comparisonLoading } = useComparisonAnalytics(

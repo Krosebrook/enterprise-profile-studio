@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   useKnowledgeDocuments, 
   useDeleteDocument, 
@@ -19,8 +19,10 @@ import { Footer } from '@/components/layout/Footer';
 import { Plus, Search, BookOpen, Loader2, PanelLeftClose, PanelLeft, FileText, Command } from 'lucide-react';
 import { StaggerContainer, StaggerItem, FadeIn } from '@/components/ui/animations';
 import { cn } from '@/lib/utils';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 export default function KnowledgeBasePage() {
+  const navigate = useNavigate();
   const { data: documents, isLoading } = useKnowledgeDocuments();
   const { data: folders = [] } = useKnowledgeFolders();
   const deleteDocument = useDeleteDocument();
@@ -30,6 +32,16 @@ export default function KnowledgeBasePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  // Enable keyboard shortcuts
+  useKeyboardShortcuts();
+  
+  // Listen for shortcut events
+  useEffect(() => {
+    const handleNewDocument = () => navigate('/knowledge/new');
+    window.addEventListener('shortcut:new-profile', handleNewDocument);
+    return () => window.removeEventListener('shortcut:new-profile', handleNewDocument);
+  }, [navigate]);
 
   const filteredDocuments = documents?.filter((doc) => {
     const matchesSearch =
@@ -151,10 +163,11 @@ export default function KnowledgeBasePage() {
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search documents..."
+                      placeholder="Search documents... (press /)"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10 border-border/60 focus:border-primary"
+                      data-search-input
                     />
                   </div>
                 </div>
