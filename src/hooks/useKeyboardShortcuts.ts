@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -25,13 +25,15 @@ export function useKeyboardShortcuts() {
     return isInput || isEditable;
   }, []);
 
-  const shortcuts: ShortcutConfig[] = [
+  const pathname = location.pathname;
+  
+  const shortcuts: ShortcutConfig[] = useMemo(() => [
     {
       key: 'n',
       action: () => {
-        if (location.pathname.includes('/knowledge')) {
+        if (pathname.includes('/knowledge')) {
           navigate('/knowledge/new');
-        } else if (location.pathname.includes('/dashboard')) {
+        } else if (pathname.includes('/dashboard')) {
           // Trigger new profile dialog - dispatch custom event
           window.dispatchEvent(new CustomEvent('shortcut:new-profile'));
         } else {
@@ -113,7 +115,7 @@ export function useKeyboardShortcuts() {
       description: 'Show keyboard shortcuts',
       requiresAuth: false,
     },
-  ];
+  ], [navigate, pathname]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -136,7 +138,7 @@ export function useKeyboardShortcuts() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [user, location.pathname, isInputFocused, navigate]);
+  }, [user, shortcuts, isInputFocused]);
 
   return { shortcuts };
 }
