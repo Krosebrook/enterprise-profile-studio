@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   useKnowledgeDocuments, 
@@ -15,6 +15,7 @@ import { TagManager } from '@/components/knowledge/TagManager';
 import { MultiTagFilter } from '@/components/knowledge/MultiTagFilter';
 import { DocumentTemplateDialog } from '@/components/knowledge/DocumentTemplateDialog';
 import { DocumentSearch } from '@/components/knowledge/DocumentSearch';
+import { DocumentSortSelect, SortOption } from '@/components/knowledge/DocumentSortSelect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -36,6 +37,7 @@ export default function KnowledgeBasePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortOption, setSortOption] = useState<SortOption>('date-desc');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   
@@ -61,23 +63,49 @@ export default function KnowledgeBasePage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const filteredDocuments = documents?.filter((doc) => {
-    const matchesSearch =
-      !searchTerm ||
-      doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.description?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredDocuments = useMemo(() => {
+    const filtered = documents?.filter((doc) => {
+      const matchesSearch =
+        !searchTerm ||
+        doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory = !selectedCategory || doc.category === selectedCategory;
-    
-    const matchesFolder = selectedFolderId === null || doc.folder_id === selectedFolderId;
+      const matchesCategory = !selectedCategory || doc.category === selectedCategory;
+      
+      const matchesFolder = selectedFolderId === null || doc.folder_id === selectedFolderId;
 
-    // Multi-tag filtering - document must have ALL selected tags
-    const matchesTags = selectedTags.length === 0 || 
-      selectedTags.every(tag => doc.tags?.includes(tag));
+      // Multi-tag filtering - document must have ALL selected tags
+      const matchesTags = selectedTags.length === 0 || 
+        selectedTags.every(tag => doc.tags?.includes(tag));
 
-    return matchesSearch && matchesCategory && matchesFolder && matchesTags;
-  });
+      return matchesSearch && matchesCategory && matchesFolder && matchesTags;
+    });
+
+    // Apply sorting
+    if (!filtered) return filtered;
+
+    return [...filtered].sort((a, b) => {
+      switch (sortOption) {
+        case 'date-desc':
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        case 'date-asc':
+          return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+        case 'title-asc':
+          return a.title.localeCompare(b.title);
+        case 'title-desc':
+          return b.title.localeCompare(a.title);
+        case 'category-asc':
+          return (a.category || '').localeCompare(b.category || '');
+        case 'tags-desc':
+          return (b.tags?.length || 0) - (a.tags?.length || 0);
+        case 'tags-asc':
+          return (a.tags?.length || 0) - (b.tags?.length || 0);
+        default:
+          return 0;
+      }
+    });
+  }, [documents, searchTerm, selectedCategory, selectedFolderId, selectedTags, sortOption]);
 
   const handleDelete = async (id: string) => {
     await deleteDocument.mutateAsync(id);
@@ -205,6 +233,7 @@ export default function KnowledgeBasePage() {
                         <kbd className="ml-1 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">⌘K</kbd>
                       </Button>
                     </div>
+                    <DocumentSortSelect value={sortOption} onChange={setSortOption} />
                   </div>
                   
                   {/* Multi-Tag Filter */}
