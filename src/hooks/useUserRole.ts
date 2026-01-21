@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 export type AppRole = 'admin' | 'manager' | 'user';
 
-interface UserRole {
+export interface UserRole {
   id: string;
   user_id: string;
   role: AppRole;
@@ -107,11 +107,11 @@ export function useRemoveRole() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (userId: string) => {
+    mutationFn: async (roleId: string) => {
       const { error } = await supabase
         .from('user_roles')
         .delete()
-        .eq('user_id', userId);
+        .eq('id', roleId);
       
       if (error) throw error;
     },

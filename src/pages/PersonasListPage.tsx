@@ -2,29 +2,64 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { useEmployeePersonas, useCreatePersona, useDeletePersona } from '@/hooks/useEmployeePersonas';
+import { useEmployeePersonas, useCreatePersona, useDeletePersona, useUpdatePersona } from '@/hooks/useEmployeePersonas';
+import { PersonaTemplateSelector } from '@/components/persona/PersonaTemplateSelector';
 import { Plus, User, Trash2, Loader2, Bot, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { PersonaTemplate } from '@/data/personaTemplates';
 
 export default function PersonasListPage() {
   const navigate = useNavigate();
   const { data: personas = [], isLoading } = useEmployeePersonas();
   const createPersona = useCreatePersona();
+  const updatePersona = useUpdatePersona();
   const deletePersona = useDeletePersona();
   
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [newName, setNewName] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
-  const handleCreate = async () => {
-    if (!newName.trim()) return;
-    const result = await createPersona.mutateAsync({ name: newName });
-    setDialogOpen(false);
-    setNewName('');
-    navigate(`/personas/${result.id}`);
+  const handleCreateBlank = async (name: string) => {
+    setIsCreating(true);
+    try {
+      const result = await createPersona.mutateAsync({ name });
+      setDialogOpen(false);
+      navigate(`/personas/${result.id}`);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleSelectTemplate = async (template: PersonaTemplate, name: string) => {
+    setIsCreating(true);
+    try {
+      // Create persona first
+      const result = await createPersona.mutateAsync({ name });
+      
+      // Then update with template data
+      await updatePersona.mutateAsync({
+        id: result.id,
+        updates: {
+          job_title: template.data.job_title,
+          department: template.data.department,
+          communication_style: template.data.communication_style,
+          work_preferences: template.data.work_preferences,
+          skills: template.data.skills,
+          expertise_areas: template.data.expertise_areas,
+          tools_used: template.data.tools_used,
+          pain_points: template.data.pain_points,
+          goals: template.data.goals,
+          ai_interaction_style: template.data.ai_interaction_style,
+          preferred_response_length: template.data.preferred_response_length,
+          preferred_tone: template.data.preferred_tone,
+        },
+      });
+      
+      setDialogOpen(false);
+      navigate(`/personas/${result.id}`);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -38,39 +73,20 @@ export default function PersonasListPage() {
               Create and manage employee AI profiles for Claude, Copilot, and Gemini
             </p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="primary-gradient border-0">
-                <Plus className="mr-2 h-4 w-4" />
-                New Persona
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Persona</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Employee Name</Label>
-                  <Input
-                    id="name"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="e.g., John Doe"
-                    autoFocus
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreate} disabled={!newName.trim() || createPersona.isPending}>
-                  {createPersona.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button className="primary-gradient border-0" onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Persona
+          </Button>
         </div>
+
+        {/* Template Selector Dialog */}
+        <PersonaTemplateSelector
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          onSelectTemplate={handleSelectTemplate}
+          onCreateBlank={handleCreateBlank}
+          isLoading={isCreating}
+        />
 
         {/* Personas Grid */}
         {isLoading ? (
