@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { 
   Bot, 
   Sparkles, 
@@ -12,13 +13,15 @@ import {
   Copy, 
   Check,
   Download,
-  RefreshCw
+  RefreshCw,
+  FileText
 } from 'lucide-react';
 import { useEcosystemExports, useSaveEcosystemExport, useEmployeeHats } from '@/hooks/useEmployeePersonas';
 import { supabase } from '@/integrations/supabase/client';
 import type { EmployeePersona, EcosystemExport } from '@/types/employee-persona';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { GeneratePersonaDocButton } from './GeneratePersonaDocButton';
 
 interface EcosystemExportPanelProps {
   persona: EmployeePersona;
@@ -189,13 +192,38 @@ export function EcosystemExportPanel({ persona }: EcosystemExportPanelProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Multi-Ecosystem Export</CardTitle>
-        <CardDescription>
-          Generate and manage AI prompts for different platforms
-        </CardDescription>
-      </CardHeader>
+    <div className="space-y-6">
+      {/* Knowledge Base Document Export */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Knowledge Base Export
+          </CardTitle>
+          <CardDescription>
+            Generate a comprehensive AI configuration document from this persona's data
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Creates a detailed markdown document with all persona settings, communication preferences, 
+            and ready-to-use prompts for Claude, Copilot, and Gemini. The document is saved to your 
+            Knowledge Base for easy reference and sharing.
+          </p>
+          <GeneratePersonaDocButton persona={persona} />
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* Ecosystem Prompts */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Multi-Ecosystem Export</CardTitle>
+          <CardDescription>
+            Generate and manage AI prompts for different platforms
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
           <TabsList className="grid w-full grid-cols-3">
@@ -336,5 +364,6 @@ export function EcosystemExportPanel({ persona }: EcosystemExportPanelProps) {
         </Tabs>
       </CardContent>
     </Card>
+    </div>
   );
 }
