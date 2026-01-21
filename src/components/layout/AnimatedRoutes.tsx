@@ -18,6 +18,9 @@ import DealDetailPage from '@/pages/DealDetailPage';
 import DealPipelinePage from '@/pages/DealPipelinePage';
 import DealAnalyticsPage from '@/pages/DealAnalyticsPage';
 import AIPlatformExplorerPage from '@/pages/AIPlatformExplorerPage';
+import PersonasListPage from '@/pages/PersonasListPage';
+import PersonaBuilderPage from '@/pages/PersonaBuilderPage';
+import TeamManagementPage from '@/pages/TeamManagementPage';
 import NotFound from '@/pages/NotFound';
 
 export function AnimatedRoutes() {
@@ -103,6 +106,30 @@ export function AnimatedRoutes() {
           element={
             <PageTransition>
               <AnalyticsDashboardPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/personas"
+          element={
+            <PageTransition>
+              <PersonasListPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/personas/:id"
+          element={
+            <PageTransition>
+              <PersonaBuilderPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/team"
+          element={
+            <PageTransition>
+              <TeamManagementPage />
             </PageTransition>
           }
         />

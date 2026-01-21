@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, LayoutDashboard, BookOpen, BarChart3, Brain } from 'lucide-react';
+import { useUserRole } from '@/hooks/useUserRole';
+import { LogOut, LayoutDashboard, BookOpen, BarChart3, Brain, Users, Bot } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,9 +13,11 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { KeyboardShortcutsHelp } from '@/components/ui/KeyboardShortcutsHelp';
+import { Badge } from '@/components/ui/badge';
 
 export function Navbar() {
   const { user, signOut } = useAuth();
+  const { role, isAdmin } = useUserRole();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -60,6 +63,20 @@ export function Navbar() {
                   <span className="hidden sm:inline">Analytics</span>
                 </Link>
               </Button>
+              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground" asChild>
+                <Link to="/personas">
+                  <Bot className="h-4 w-4" />
+                  <span className="hidden sm:inline">Personas</span>
+                </Link>
+              </Button>
+              {isAdmin && (
+                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground" asChild>
+                  <Link to="/team">
+                    <Users className="h-4 w-4" />
+                    <span className="hidden sm:inline">Team</span>
+                  </Link>
+                </Button>
+              )}
               <div className="ml-1 h-6 w-px bg-border" />
               <KeyboardShortcutsHelp />
               <ThemeToggle />
@@ -76,7 +93,10 @@ export function Navbar() {
                 <DropdownMenuContent className="w-56 bg-popover" align="end">
                   <div className="flex items-center justify-start gap-2 p-3">
                     <div className="flex flex-col space-y-0.5 leading-none">
-                      <p className="text-sm font-medium">{user.email}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{user.email}</p>
+                        {role && <Badge variant="outline" className="text-xs">{role}</Badge>}
+                      </div>
                       <p className="text-xs text-muted-foreground">Manage your account</p>
                     </div>
                   </div>
