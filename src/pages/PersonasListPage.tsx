@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useEmployeePersonas, useCreatePersona, useDeletePersona, useUpdatePersona } from '@/hooks/useEmployeePersonas';
 import { PersonaTemplateSelector } from '@/components/persona/PersonaTemplateSelector';
-import { Plus, User, Trash2, Loader2, Bot, ArrowRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { PersonaCard } from '@/components/persona/PersonaCard';
+import { PersonaStatsBar } from '@/components/persona/PersonaStatsBar';
+import { PersonaFilterBar } from '@/components/persona/PersonaFilterBar';
+import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
+import { Plus, Loader2, Bot, Sparkles } from 'lucide-react';
 import type { PersonaTemplate } from '@/data/personaTemplates';
 
 export default function PersonasListPage() {
@@ -18,6 +21,63 @@ export default function PersonasListPage() {
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // Get unique departments
+  const departments = useMemo(() => {
+    const depts = personas
+      .map(p => p.department)
+      .filter((d): d is string => !!d);
+    return [...new Set(depts)].sort();
+  }, [personas]);
+  
+  // Filter personas
+  const filteredPersonas = useMemo(() => {
+    return personas.filter(persona => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = persona.name.toLowerCase().includes(query);
+        const matchesTitle = persona.job_title?.toLowerCase().includes(query);
+        const matchesDept = persona.department?.toLowerCase().includes(query);
+        const matchesSkills = persona.skills?.some(s => s.toLowerCase().includes(query));
+        if (!matchesName && !matchesTitle && !matchesDept && !matchesSkills) {
+          return false;
+        }
+      }
+      
+      // Department filter
+      if (selectedDepartments.length > 0 && !selectedDepartments.includes(persona.department || '')) {
+        return false;
+      }
+      
+      // Status filter
+      if (selectedStatus && persona.status !== selectedStatus) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [personas, searchQuery, selectedDepartments, selectedStatus]);
+  
+  const hasActiveFilters = searchQuery !== '' || selectedDepartments.length > 0 || selectedStatus !== null;
+  
+  const handleDepartmentToggle = (dept: string) => {
+    setSelectedDepartments(prev => 
+      prev.includes(dept) ? prev.filter(d => d !== dept) : [...prev, dept]
+    );
+  };
+  
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setSelectedDepartments([]);
+    setSelectedStatus(null);
+  };
 
   const handleCreateBlank = async (name: string) => {
     setIsCreating(true);
@@ -33,10 +93,8 @@ export default function PersonasListPage() {
   const handleSelectTemplate = async (template: PersonaTemplate, name: string) => {
     setIsCreating(true);
     try {
-      // Create persona first
       const result = await createPersona.mutateAsync({ name });
       
-      // Then update with template data
       await updatePersona.mutateAsync({
         id: result.id,
         updates: {
@@ -63,110 +121,150 @@ export default function PersonasListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-12 pt-20">
-      <div className="container max-w-5xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="font-display text-3xl font-bold">AI Personas</h1>
-            <p className="mt-1 text-muted-foreground">
-              Create and manage employee AI profiles for Claude, Copilot, and Gemini
-            </p>
-          </div>
-          <Button className="primary-gradient border-0" onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Persona
-          </Button>
-        </div>
-
-        {/* Template Selector Dialog */}
-        <PersonaTemplateSelector
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          onSelectTemplate={handleSelectTemplate}
-          onCreateBlank={handleCreateBlank}
-          isLoading={isCreating}
-        />
-
-        {/* Personas Grid */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : personas.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="rounded-full bg-primary/10 p-4 mb-4">
-                <Bot className="h-8 w-8 text-primary" />
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
+      
+      <main className="flex-1 pb-12 pt-20">
+        <div className="container max-w-7xl">
+          {/* Hero Header */}
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="the-dot animate-pulse-dot" />
+                  <span className="text-sm font-medium text-primary">INT Inc. AI Platform</span>
+                </div>
+                <h1 className="font-display text-4xl font-bold tracking-tight">
+                  Persona Management
+                </h1>
+                <p className="mt-2 text-lg text-muted-foreground max-w-2xl">
+                  Build AI-ready personas for your team. Configure communication styles, roles, and export to Claude, Copilot, and Gemini.
+                </p>
               </div>
-              <h3 className="text-lg font-medium">No personas yet</h3>
-              <p className="text-muted-foreground mt-1 mb-4">
-                Create your first AI persona to get started
-              </p>
-              <Button onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Persona
+              <Button 
+                size="lg" 
+                className="primary-gradient border-0 gap-2 shadow-lg hover:shadow-xl transition-shadow" 
+                onClick={() => setDialogOpen(true)}
+              >
+                <Plus className="h-5 w-5" />
+                New Persona
+                <Sparkles className="h-4 w-4 ml-1" />
               </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {personas.map((persona) => (
-              <Card key={persona.id} className="group hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                        <User className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-base">{persona.name}</CardTitle>
-                        <CardDescription>
-                          {persona.job_title || 'No title set'}
-                          {persona.department && ` • ${persona.department}`}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <Badge variant={persona.status === 'active' ? 'default' : 'secondary'}>
-                      {persona.status}
-                    </Badge>
+            </div>
+          </motion.div>
+
+          {/* Template Selector Dialog */}
+          <PersonaTemplateSelector
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            onSelectTemplate={handleSelectTemplate}
+            onCreateBlank={handleCreateBlank}
+            isLoading={isCreating}
+          />
+
+          {/* Stats Bar */}
+          {!isLoading && personas.length > 0 && (
+            <motion.div 
+              className="mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <PersonaStatsBar personas={personas} />
+            </motion.div>
+          )}
+
+          {/* Filter Bar */}
+          {!isLoading && personas.length > 0 && (
+            <motion.div 
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <PersonaFilterBar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                selectedDepartments={selectedDepartments}
+                onDepartmentToggle={handleDepartmentToggle}
+                selectedStatus={selectedStatus}
+                onStatusChange={setSelectedStatus}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                departments={departments}
+                onClearFilters={handleClearFilters}
+                hasActiveFilters={hasActiveFilters}
+              />
+            </motion.div>
+          )}
+
+          {/* Personas Grid */}
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-24">
+              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Loading personas...</p>
+            </div>
+          ) : personas.length === 0 ? (
+            <motion.div 
+              className="bg-card rounded-2xl border shadow-sm"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+                  <div className="relative rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 p-6">
+                    <Bot className="h-12 w-12 text-primary" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
-                      {persona.skills?.slice(0, 3).map((skill, i) => (
-                        <Badge key={i} variant="outline" className="text-xs">{skill}</Badge>
-                      ))}
-                      {(persona.skills?.length || 0) > 3 && (
-                        <Badge variant="outline" className="text-xs">+{persona.skills!.length - 3}</Badge>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deletePersona.mutate(persona.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/personas/${persona.id}`)}
-                      >
-                        Edit
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Create Your First AI Persona</h3>
+                <p className="text-muted-foreground max-w-md mb-6">
+                  AI personas help your team members get personalized AI assistance. 
+                  Start with a template or create a custom persona.
+                </p>
+                <Button size="lg" className="primary-gradient border-0" onClick={() => setDialogOpen(true)}>
+                  <Plus className="mr-2 h-5 w-5" />
+                  Create Persona
+                </Button>
+              </div>
+            </motion.div>
+          ) : filteredPersonas.length === 0 ? (
+            <motion.div
+              className="text-center py-16"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <p className="text-muted-foreground mb-4">No personas match your filters</p>
+              <Button variant="outline" onClick={handleClearFilters}>
+                Clear Filters
+              </Button>
+            </motion.div>
+          ) : (
+            <div className={
+              viewMode === 'grid' 
+                ? 'grid gap-5 sm:grid-cols-2 lg:grid-cols-3' 
+                : 'space-y-4'
+            }>
+              <AnimatePresence mode="popLayout">
+                {filteredPersonas.map((persona) => (
+                  <PersonaCard
+                    key={persona.id}
+                    persona={persona}
+                    onEdit={() => navigate(`/personas/${persona.id}`)}
+                    onDelete={() => deletePersona.mutate(persona.id)}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 }
