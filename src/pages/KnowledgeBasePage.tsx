@@ -12,6 +12,7 @@ import { FolderTree } from '@/components/knowledge/FolderTree';
 import { ImportDocumentsDialog } from '@/components/knowledge/ImportDocumentsDialog';
 import { SeedDocumentsButton } from '@/components/knowledge/SeedDocumentsButton';
 import { SeedStrategyDocsButton } from '@/components/knowledge/SeedStrategyDocsButton';
+import { SeedResearchDocsButton } from '@/components/knowledge/SeedResearchDocsButton';
 import { TagManager } from '@/components/knowledge/TagManager';
 import { MultiTagFilter } from '@/components/knowledge/MultiTagFilter';
 import { DocumentTemplateDialog } from '@/components/knowledge/DocumentTemplateDialog';
@@ -197,6 +198,7 @@ export default function KnowledgeBasePage() {
                       <span>K</span>
                     </div>
                     <TagManager />
+                    <SeedResearchDocsButton />
                     <SeedStrategyDocsButton />
                     <SeedDocumentsButton />
                     <ImportDocumentsDialog />
