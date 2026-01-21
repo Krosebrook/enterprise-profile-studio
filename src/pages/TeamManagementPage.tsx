@@ -6,8 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useUserRole, useAllUserRoles, useAssignRole, type AppRole } from '@/hooks/useUserRole';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useUserRole, useAllUserRoles } from '@/hooks/useUserRole';
 import { useAllPersonas, usePersonaStats } from '@/hooks/useAdminPersonas';
+import { RoleAssignmentCard } from '@/components/persona/RoleAssignmentCard';
+import { BulkExportDialog } from '@/components/persona/BulkExportDialog';
 import { 
   Users, 
   Bot, 
@@ -17,24 +20,27 @@ import {
   Loader2, 
   Search,
   ArrowRight,
-  UserPlus,
   ShieldCheck,
   ShieldAlert,
-  Activity
+  Activity,
+  Download,
+  FileArchive
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import type { EmployeePersona } from '@/types/employee-persona';
 
 export default function TeamManagementPage() {
   const navigate = useNavigate();
   const { isAdmin, isLoading: roleLoading } = useUserRole();
   const { data: personas = [], isLoading: personasLoading } = useAllPersonas();
   const { data: roles = [] } = useAllUserRoles();
-  const assignRole = useAssignRole();
   const stats = usePersonaStats();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
+  const [bulkExportOpen, setBulkExportOpen] = useState(false);
+  const [selectedPersonas, setSelectedPersonas] = useState<Set<string>>(new Set());
 
   if (roleLoading) {
     return (
@@ -71,6 +77,24 @@ export default function TeamManagementPage() {
     
     return matchesSearch && matchesDepartment;
   });
+
+  const togglePersonaSelection = (id: string) => {
+    const newSet = new Set(selectedPersonas);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedPersonas(newSet);
+  };
+
+  const toggleAllFiltered = () => {
+    if (selectedPersonas.size === filteredPersonas.length) {
+      setSelectedPersonas(new Set());
+    } else {
+      setSelectedPersonas(new Set(filteredPersonas.map(p => p.id)));
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-12 pt-20">
@@ -172,6 +196,16 @@ export default function TeamManagementPage() {
                 <CardDescription>View and manage all employee personas</CardDescription>
               </div>
               <div className="flex items-center gap-3">
+                {selectedPersonas.size > 0 && (
+                  <Button onClick={() => setBulkExportOpen(true)} variant="outline">
+                    <FileArchive className="mr-2 h-4 w-4" />
+                    Export {selectedPersonas.size}
+                  </Button>
+                )}
+                <Button onClick={() => setBulkExportOpen(true)} variant="outline">
+                  <Download className="mr-2 h-4 w-4" />
+                  Bulk Export
+                </Button>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -214,6 +248,12 @@ export default function TeamManagementPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={selectedPersonas.size === filteredPersonas.length && filteredPersonas.length > 0}
+                        onCheckedChange={toggleAllFiltered}
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Department</TableHead>
@@ -225,6 +265,12 @@ export default function TeamManagementPage() {
                 <TableBody>
                   {filteredPersonas.map((persona) => (
                     <TableRow key={persona.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedPersonas.has(persona.id)}
+                          onCheckedChange={() => togglePersonaSelection(persona.id)}
+                        />
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
@@ -271,6 +317,11 @@ export default function TeamManagementPage() {
           </CardContent>
         </Card>
 
+        {/* Role Management Card */}
+        <div className="mt-8">
+          <RoleAssignmentCard />
+        </div>
+
         {/* Recently Updated */}
         {stats.recentlyUpdated.length > 0 && (
           <Card className="mt-8">
@@ -315,6 +366,16 @@ export default function TeamManagementPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Bulk Export Dialog */}
+        <BulkExportDialog
+          open={bulkExportOpen}
+          onOpenChange={setBulkExportOpen}
+          personas={selectedPersonas.size > 0 
+            ? personas.filter(p => selectedPersonas.has(p.id)) as EmployeePersona[]
+            : personas as EmployeePersona[]
+          }
+        />
       </div>
     </div>
   );
