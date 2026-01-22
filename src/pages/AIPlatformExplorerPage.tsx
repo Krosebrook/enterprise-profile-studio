@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, GitCompare, Grid3X3, Calculator, ClipboardCheck, Building2, Users } from 'lucide-react';
+import { Brain, GitCompare, Grid3X3, Calculator, ClipboardCheck, Building2, Users, TrendingUp, Activity, Shield } from 'lucide-react';
 import { PlatformExplorerTab } from '@/components/ai-explorer/PlatformExplorerTab';
 import { PlatformComparisonTab } from '@/components/ai-explorer/PlatformComparisonTab';
 import { CapabilityMatrixTab } from '@/components/ai-explorer/CapabilityMatrixTab';
@@ -10,6 +10,10 @@ import { ROICalculatorTab } from '@/components/ai-explorer/ROICalculatorTab';
 import { AIAssessmentTab } from '@/components/ai-explorer/AIAssessmentTab';
 import { EnterpriseDashboardTab } from '@/components/ai-explorer/EnterpriseDashboardTab';
 import { DepartmentRecommendationsTab } from '@/components/ai-explorer/DepartmentRecommendationsTab';
+import { StrategicAssessmentDashboard } from '@/components/ai-explorer/StrategicAssessmentDashboard';
+import { TCOCalculatorTab } from '@/components/ai-explorer/TCOCalculatorTab';
+import { PerformanceMetricsTab } from '@/components/ai-explorer/PerformanceMetricsTab';
+import { GRCControlTowerTab } from '@/components/ai-explorer/GRCControlTowerTab';
 
 export default function AIPlatformExplorerPage() {
   const [activeTab, setActiveTab] = useState('enterprise');
@@ -34,53 +38,44 @@ export default function AIPlatformExplorerPage() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 lg:w-auto lg:inline-grid h-auto p-1 bg-muted/50">
-              <TabsTrigger 
-                value="enterprise" 
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm py-2.5"
-              >
+            <TabsList className="flex flex-wrap h-auto p-1 bg-muted/50 gap-1">
+              <TabsTrigger value="enterprise" className="gap-2 data-[state=active]:bg-background py-2">
                 <Building2 className="h-4 w-4" />
                 <span className="hidden sm:inline">Dashboard</span>
               </TabsTrigger>
-              <TabsTrigger 
-                value="departments" 
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm py-2.5"
-              >
+              <TabsTrigger value="strategic" className="gap-2 data-[state=active]:bg-background py-2">
+                <TrendingUp className="h-4 w-4" />
+                <span className="hidden sm:inline">Strategic</span>
+              </TabsTrigger>
+              <TabsTrigger value="tco" className="gap-2 data-[state=active]:bg-background py-2">
+                <Calculator className="h-4 w-4" />
+                <span className="hidden sm:inline">TCO</span>
+              </TabsTrigger>
+              <TabsTrigger value="performance" className="gap-2 data-[state=active]:bg-background py-2">
+                <Activity className="h-4 w-4" />
+                <span className="hidden sm:inline">Performance</span>
+              </TabsTrigger>
+              <TabsTrigger value="grc" className="gap-2 data-[state=active]:bg-background py-2">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">GRC</span>
+              </TabsTrigger>
+              <TabsTrigger value="departments" className="gap-2 data-[state=active]:bg-background py-2">
                 <Users className="h-4 w-4" />
                 <span className="hidden sm:inline">Departments</span>
               </TabsTrigger>
-              <TabsTrigger 
-                value="explorer" 
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm py-2.5"
-              >
+              <TabsTrigger value="explorer" className="gap-2 data-[state=active]:bg-background py-2">
                 <Brain className="h-4 w-4" />
-                <span className="hidden sm:inline">All Platforms</span>
+                <span className="hidden sm:inline">Platforms</span>
               </TabsTrigger>
-              <TabsTrigger 
-                value="compare" 
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm py-2.5"
-              >
+              <TabsTrigger value="compare" className="gap-2 data-[state=active]:bg-background py-2">
                 <GitCompare className="h-4 w-4" />
                 <span className="hidden sm:inline">Compare</span>
               </TabsTrigger>
-              <TabsTrigger 
-                value="matrix" 
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm py-2.5"
-              >
+              <TabsTrigger value="matrix" className="gap-2 data-[state=active]:bg-background py-2">
                 <Grid3X3 className="h-4 w-4" />
                 <span className="hidden sm:inline">Matrix</span>
               </TabsTrigger>
-              <TabsTrigger 
-                value="roi" 
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm py-2.5"
-              >
-                <Calculator className="h-4 w-4" />
-                <span className="hidden sm:inline">ROI</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="assessment" 
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm py-2.5"
-              >
+              <TabsTrigger value="assessment" className="gap-2 data-[state=active]:bg-background py-2">
                 <ClipboardCheck className="h-4 w-4" />
                 <span className="hidden sm:inline">Assessment</span>
               </TabsTrigger>
@@ -89,27 +84,30 @@ export default function AIPlatformExplorerPage() {
             <TabsContent value="enterprise" className="mt-6">
               <EnterpriseDashboardTab />
             </TabsContent>
-
+            <TabsContent value="strategic" className="mt-6">
+              <StrategicAssessmentDashboard />
+            </TabsContent>
+            <TabsContent value="tco" className="mt-6">
+              <TCOCalculatorTab />
+            </TabsContent>
+            <TabsContent value="performance" className="mt-6">
+              <PerformanceMetricsTab />
+            </TabsContent>
+            <TabsContent value="grc" className="mt-6">
+              <GRCControlTowerTab />
+            </TabsContent>
             <TabsContent value="departments" className="mt-6">
               <DepartmentRecommendationsTab />
             </TabsContent>
-
             <TabsContent value="explorer" className="mt-6">
               <PlatformExplorerTab />
             </TabsContent>
-
             <TabsContent value="compare" className="mt-6">
               <PlatformComparisonTab />
             </TabsContent>
-
             <TabsContent value="matrix" className="mt-6">
               <CapabilityMatrixTab />
             </TabsContent>
-
-            <TabsContent value="roi" className="mt-6">
-              <ROICalculatorTab />
-            </TabsContent>
-
             <TabsContent value="assessment" className="mt-6">
               <AIAssessmentTab />
             </TabsContent>
