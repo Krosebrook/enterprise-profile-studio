@@ -556,6 +556,48 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          interest: string | null
+          message: string | null
+          name: string
+          phone: string | null
+          source: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          interest?: string | null
+          message?: string | null
+          name: string
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          interest?: string | null
+          message?: string | null
+          name?: string
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profile_revisions: {
         Row: {
           created_at: string

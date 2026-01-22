@@ -7,6 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { ROICalculatorWidget } from '@/components/pricing/ROICalculatorWidget';
 import { FeatureComparisonTable } from '@/components/pricing/FeatureComparisonTable';
 import { StrategyToolkit } from '@/components/pricing/StrategyToolkit';
+import { ContactForm } from '@/components/pricing/ContactForm';
 import { 
   ArrowRight, 
   Check, 
@@ -431,45 +432,79 @@ export default function IntIncProfilePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-muted/30">
+      {/* Contact Form Section */}
+      <section id="contact" className="py-24 bg-muted/30">
         <div className="container">
-          <div className="relative overflow-hidden rounded-2xl hero-gradient px-8 py-16 text-center md:px-16">
-            <div className="absolute inset-0 halftone-pattern opacity-10" />
+          <div className="mx-auto mb-16 max-w-2xl text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="the-dot-lg" />
+              <span className="text-sm font-medium text-accent uppercase tracking-wider">Contact Us</span>
+            </div>
+            <h2 className="font-display text-3xl font-bold md:text-4xl">
+              Ready to Transform Your
+              <span className="text-gradient"> AI Strategy?</span>
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Join 500+ enterprises using INT Inc. to enable AI-powered productivity across their organizations
+            </p>
+          </div>
+          
+          <div className="grid gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
+            <ContactForm />
             
-            <div className="relative">
-              <div className="flex justify-center mb-6">
-                <div className="the-dot-lg animate-pulse-dot" />
-              </div>
-              <h2 className="font-display text-3xl font-bold text-white md:text-4xl">
-                Ready to Transform Your AI Strategy?
-              </h2>
-              <p className="mx-auto mt-4 max-w-xl text-lg text-white/70">
-                Join 500+ enterprises using INT Inc. to enable AI-powered productivity 
-                across their organizations.
-              </p>
-              <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-                <Button 
-                  asChild 
-                  size="lg" 
-                  className="bg-white text-foreground hover:bg-white/90 shadow-lg"
-                >
-                  <Link to="/signup">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button 
-                  asChild 
-                  size="lg" 
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
-                >
-                  <Link to="/personas">
-                    Build Your First Persona
-                  </Link>
-                </Button>
-              </div>
+            <div className="space-y-6">
+              <Card className="border-border/60">
+                <CardHeader>
+                  <CardTitle className="font-display text-lg">Why INT Inc.?</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 shrink-0 mt-0.5">
+                      <Check className="h-3 w-3 text-accent" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Enterprise-Grade Security</p>
+                      <p className="text-sm text-muted-foreground">SOC 2 Type II certified with full GDPR and CCPA compliance</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 shrink-0 mt-0.5">
+                      <Check className="h-3 w-3 text-accent" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Multi-Ecosystem Support</p>
+                      <p className="text-sm text-muted-foreground">Deploy to Claude, Microsoft Copilot, Google Gemini, and custom APIs</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 shrink-0 mt-0.5">
+                      <Check className="h-3 w-3 text-accent" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Proven ROI</p>
+                      <p className="text-sm text-muted-foreground">15-22% productivity gains with 626% 3-year return on investment</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-border/60 bg-gradient-to-br from-primary/5 to-accent/5">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Users className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="text-3xl font-display font-bold text-gradient">500+</p>
+                      <p className="text-sm text-muted-foreground">Enterprise Clients</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    From startups to Fortune 500 companies, organizations trust INT Inc. 
+                    to power their AI transformation journey.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
