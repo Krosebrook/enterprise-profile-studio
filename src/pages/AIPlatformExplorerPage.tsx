@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, GitCompare, Grid3X3, Calculator, ClipboardCheck, Building2, Users, TrendingUp, Activity, Shield, Sparkles } from 'lucide-react';
+import { Brain, GitCompare, Grid3X3, Calculator, ClipboardCheck, Building2, Users, TrendingUp, Activity, Shield, Sparkles, Trophy } from 'lucide-react';
 import { PlatformExplorerTab } from '@/components/ai-explorer/PlatformExplorerTab';
 import { PlatformComparisonTab } from '@/components/ai-explorer/PlatformComparisonTab';
 import { CapabilityMatrixTab } from '@/components/ai-explorer/CapabilityMatrixTab';
@@ -15,6 +15,7 @@ import { TCOCalculatorTab } from '@/components/ai-explorer/TCOCalculatorTab';
 import { PerformanceMetricsTab } from '@/components/ai-explorer/PerformanceMetricsTab';
 import { GRCControlTowerTab } from '@/components/ai-explorer/GRCControlTowerTab';
 import { MicrosoftDeepDiveTab } from '@/components/ai-explorer/MicrosoftDeepDiveTab';
+import { PlatformRankingsTab } from '@/components/ai-explorer/PlatformRankingsTab';
 
 export default function AIPlatformExplorerPage() {
   const [activeTab, setActiveTab] = useState('enterprise');
@@ -84,6 +85,10 @@ export default function AIPlatformExplorerPage() {
                 <ClipboardCheck className="h-4 w-4" />
                 <span className="hidden sm:inline">Assessment</span>
               </TabsTrigger>
+              <TabsTrigger value="rankings" className="gap-2 data-[state=active]:bg-background py-2">
+                <Trophy className="h-4 w-4" />
+                <span className="hidden sm:inline">Rankings</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="enterprise" className="mt-6">
@@ -118,6 +123,9 @@ export default function AIPlatformExplorerPage() {
             </TabsContent>
             <TabsContent value="assessment" className="mt-6">
               <AIAssessmentTab />
+            </TabsContent>
+            <TabsContent value="rankings" className="mt-6">
+              <PlatformRankingsTab />
             </TabsContent>
           </Tabs>
         </div>
