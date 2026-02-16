@@ -1,8 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
-import { LogOut, LayoutDashboard, BookOpen, BarChart3, Brain, Users, Bot, FileText } from 'lucide-react';
+import { LogOut, LayoutDashboard, BookOpen, BarChart3, Brain, Users, Bot, FileText, Wand2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -106,6 +107,20 @@ export function Navbar() {
                       <p className="text-xs text-muted-foreground">Manage your account</p>
                     </div>
                   </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      if (!user) return;
+                      await supabase
+                        .from('user_onboarding_preferences')
+                        .update({ onboarding_completed: false })
+                        .eq('user_id', user.id);
+                      navigate('/setup');
+                    }}
+                  >
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    Re-run Setup Wizard
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
