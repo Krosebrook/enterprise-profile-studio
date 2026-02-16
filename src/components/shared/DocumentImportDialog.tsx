@@ -193,6 +193,34 @@ function UploadStep({
   onExtract,
   isExtracting,
 }: UploadStepProps) {
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      // Create a synthetic event to reuse existing handler
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      const syntheticEvent = { target: { files: dataTransfer.files } } as React.ChangeEvent<HTMLInputElement>;
+      onFileSelect(syntheticEvent);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
   return (
     <motion.div
       key="upload"
@@ -216,10 +244,14 @@ function UploadStep({
         <TabsContent value="file" className="mt-4">
           <div
             className={cn(
-              "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+              "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all",
+              isDragging ? "border-primary bg-primary/10 scale-[1.01]" :
               documentContent ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
             )}
             onClick={() => fileInputRef.current?.click()}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
           >
             {documentContent ? (
               <div className="space-y-2">
@@ -235,7 +267,7 @@ function UploadStep({
             ) : (
               <>
                 <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm font-medium">Click to upload or drag and drop</p>
+                <p className="text-sm font-medium">{isDragging ? 'Drop file here' : 'Drag & drop or click to upload'}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   PDF, DOCX, TXT, MD, JSON, YAML, CSV supported
                 </p>
