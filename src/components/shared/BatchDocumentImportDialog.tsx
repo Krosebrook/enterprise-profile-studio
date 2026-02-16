@@ -173,69 +173,14 @@ export function BatchDocumentImportDialog({
 
         <AnimatePresence mode="wait">
           {step === 'select' && (
-            <motion.div key="select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-              {/* Drop zone */}
-              <div
-                className={cn(
-                  'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
-                  files.length > 0 ? 'border-primary/40' : 'border-border hover:border-primary/50',
-                )}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm font-medium">Click to add files</p>
-                <p className="text-xs text-muted-foreground mt-1">PDF, DOCX, TXT, MD, JSON, YAML, CSV — select multiple</p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept={ACCEPT_STRING}
-                  onChange={handleFilesSelect}
-                  className="hidden"
-                />
-              </div>
-
-              {/* File list */}
-              {files.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{files.length} file{files.length > 1 ? 's' : ''} queued</span>
-                    <Button variant="ghost" size="sm" onClick={() => setFiles([])} className="text-xs text-destructive">
-                      Clear all
-                    </Button>
-                  </div>
-                  <ScrollArea className="max-h-[200px]">
-                    <div className="space-y-1">
-                      {files.map(f => (
-                        <div key={f.id} className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                          <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                          <span className="text-sm truncate flex-1">{f.name}</span>
-                          <span className="text-xs text-muted-foreground">{(f.content.length / 1024).toFixed(1)}KB</span>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(f.id)}>
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-                <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
-                <p className="text-xs text-muted-foreground">
-                  Each document is analyzed independently, then results are intelligently merged. Data from later documents fills gaps left by earlier ones.
-                </p>
-              </div>
-
-              <div className="flex justify-end">
-                <Button onClick={handleBatchExtract} disabled={files.length === 0} className="gap-2">
-                  <Sparkles className="h-4 w-4" />
-                  Analyze {files.length} Document{files.length !== 1 ? 's' : ''}
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </motion.div>
+            <BatchSelectStep
+              files={files}
+              setFiles={setFiles}
+              fileInputRef={fileInputRef}
+              handleFilesSelect={handleFilesSelect}
+              removeFile={removeFile}
+              handleBatchExtract={handleBatchExtract}
+            />
           )}
 
           {step === 'processing' && (
@@ -341,6 +286,132 @@ export function BatchDocumentImportDialog({
         </AnimatePresence>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ── Batch Select Step with drag-and-drop ── */
+
+interface BatchSelectStepProps {
+  files: QueuedFile[];
+  setFiles: React.Dispatch<React.SetStateAction<QueuedFile[]>>;
+  fileInputRef: React.RefObject<HTMLInputElement>;
+  handleFilesSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  removeFile: (id: string) => void;
+  handleBatchExtract: () => void;
+}
+
+function BatchSelectStep({
+  files, setFiles, fileInputRef, handleFilesSelect, removeFile, handleBatchExtract,
+}: BatchSelectStepProps) {
+  const [isDragging, setIsDragging] = useState(false);
+
+  const processDroppedFiles = async (droppedFiles: FileList) => {
+    const newFiles: QueuedFile[] = [];
+    for (const file of Array.from(droppedFiles)) {
+      try {
+        const text = await extractTextFromFile(file);
+        newFiles.push({
+          id: crypto.randomUUID(),
+          name: file.name,
+          content: text,
+          status: 'pending',
+        });
+      } catch (err) {
+        toast.error(`Failed to parse ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      }
+    }
+    if (newFiles.length > 0) {
+      setFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files?.length) {
+      processDroppedFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  return (
+    <motion.div key="select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+      <div
+        className={cn(
+          'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all',
+          isDragging ? 'border-primary bg-primary/10 scale-[1.01]' :
+          files.length > 0 ? 'border-primary/40' : 'border-border hover:border-primary/50',
+        )}
+        onClick={() => fileInputRef.current?.click()}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+      >
+        <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+        <p className="text-sm font-medium">{isDragging ? 'Drop files here' : 'Drag & drop or click to add files'}</p>
+        <p className="text-xs text-muted-foreground mt-1">PDF, DOCX, TXT, MD, JSON, YAML, CSV — select multiple</p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept={ACCEPT_STRING}
+          onChange={handleFilesSelect}
+          className="hidden"
+        />
+      </div>
+
+      {files.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">{files.length} file{files.length > 1 ? 's' : ''} queued</span>
+            <Button variant="ghost" size="sm" onClick={() => setFiles([])} className="text-xs text-destructive">
+              Clear all
+            </Button>
+          </div>
+          <ScrollArea className="max-h-[200px]">
+            <div className="space-y-1">
+              {files.map(f => (
+                <div key={f.id} className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                  <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm truncate flex-1">{f.name}</span>
+                  <span className="text-xs text-muted-foreground">{(f.content.length / 1024).toFixed(1)}KB</span>
+                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(f.id)}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+        <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+        <p className="text-xs text-muted-foreground">
+          Each document is analyzed independently, then results are intelligently merged.
+        </p>
+      </div>
+
+      <div className="flex justify-end">
+        <Button onClick={handleBatchExtract} disabled={files.length === 0} className="gap-2">
+          <Sparkles className="h-4 w-4" />
+          Analyze {files.length} Document{files.length !== 1 ? 's' : ''}
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </motion.div>
   );
 }
 
