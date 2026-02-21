@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,6 +69,36 @@ export function PersonaBuilderWizard({ persona, onUpdate, isSaving }: PersonaBui
     preferred_response_length: persona.preferred_response_length || 'medium',
     preferred_tone: persona.preferred_tone || 'professional',
   });
+
+  // Sync localData when persona prop changes (e.g. after async DB load or AI auto-fill)
+  useEffect(() => {
+    setLocalData({
+      name: persona.name || '',
+      email: persona.email || '',
+      department: persona.department || '',
+      job_title: persona.job_title || '',
+      communication_style: persona.communication_style || {
+        formality: 'balanced',
+        detail_level: 'balanced',
+        examples_preference: 'moderate',
+        technical_depth: 'balanced',
+      },
+      work_preferences: persona.work_preferences || {
+        focus_time: 'flexible',
+        collaboration_style: 'mixed',
+        decision_making: 'collaborative',
+        feedback_preference: 'direct',
+      },
+      pain_points: persona.pain_points || [],
+      goals: persona.goals || [],
+      skills: persona.skills || [],
+      expertise_areas: persona.expertise_areas || [],
+      tools_used: persona.tools_used || [],
+      ai_interaction_style: persona.ai_interaction_style || 'balanced',
+      preferred_response_length: persona.preferred_response_length || 'medium',
+      preferred_tone: persona.preferred_tone || 'professional',
+    });
+  }, [persona]);
 
   const [newPainPoint, setNewPainPoint] = useState('');
   const [newGoal, setNewGoal] = useState('');
