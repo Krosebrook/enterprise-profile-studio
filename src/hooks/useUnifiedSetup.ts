@@ -88,6 +88,24 @@ export function useUnifiedSetup() {
     });
   }, []);
 
+  const updatePersonaField = useCallback((field: string, value: string[]) => {
+    setData(prev => {
+      if (!prev.generatedProfile?.persona) return prev;
+      const next = {
+        ...prev,
+        generatedProfile: {
+          ...prev.generatedProfile,
+          persona: {
+            ...prev.generatedProfile.persona,
+            [field]: value,
+          },
+        },
+      };
+      localStorage.setItem(SETUP_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const generateProfile = useCallback(async () => {
     setIsGenerating(true);
     try {
@@ -229,6 +247,7 @@ export function useUnifiedSetup() {
   return {
     data,
     updateData,
+    updatePersonaField,
     generateProfile,
     isGenerating,
     saveAll,

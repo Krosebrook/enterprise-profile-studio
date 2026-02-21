@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -28,6 +29,9 @@ import {
   Wand2,
   BrainCircuit,
   HardHat,
+  Pencil,
+  X,
+  Plus,
 } from 'lucide-react';
 import { useUnifiedSetup } from '@/hooks/useUnifiedSetup';
 import { cn } from '@/lib/utils';
@@ -60,6 +64,7 @@ export function UnifiedSetupWizard() {
   const {
     data,
     updateData,
+    updatePersonaField,
     generateProfile,
     isGenerating,
     saveAll,
@@ -182,6 +187,7 @@ export function UnifiedSetupWizard() {
                   data={data}
                   onFinish={handleFinish}
                   isSaving={isSaving}
+                  onUpdateField={updatePersonaField}
                 />
               )}
             </motion.div>
@@ -406,10 +412,12 @@ function ReviewStep({
   data,
   onFinish,
   isSaving,
+  onUpdateField,
 }: {
   data: ReturnType<typeof useUnifiedSetup>['data'];
   onFinish: () => void;
   isSaving: boolean;
+  onUpdateField: (field: string, value: string[]) => void;
 }) {
   const profile = data.generatedProfile;
   const persona = profile?.persona;
@@ -420,7 +428,7 @@ function ReviewStep({
       <div>
         <h2 className="font-display text-2xl font-bold">Review Your AI Profile</h2>
         <p className="mt-1 text-muted-foreground">
-          Here's what AI generated. You can always edit later.
+          Here's what AI generated. Click the edit icon to tweak any field.
         </p>
       </div>
 
@@ -436,17 +444,17 @@ function ReviewStep({
           {/* Skills */}
           {persona?.skills?.length ? (
             <Section title="Skills & Expertise" icon={<BrainCircuit className="h-4 w-4" />}>
-              <TagRow label="Skills" items={persona.skills} />
-              <TagRow label="Expertise" items={persona.expertise_areas} />
-              <TagRow label="Tools" items={persona.tools_used} />
+              <EditableTagRow label="Skills" items={persona.skills} onSave={v => onUpdateField('skills', v)} />
+              <EditableTagRow label="Expertise" items={persona.expertise_areas} onSave={v => onUpdateField('expertise_areas', v)} />
+              <EditableTagRow label="Tools" items={persona.tools_used} onSave={v => onUpdateField('tools_used', v)} />
             </Section>
           ) : null}
 
           {/* Goals */}
           {persona?.goals?.length ? (
             <Section title="Goals & Challenges" icon={<Rocket className="h-4 w-4" />}>
-              <TagRow label="Goals" items={persona.goals} />
-              <TagRow label="Pain Points" items={persona.pain_points} />
+              <EditableTagRow label="Goals" items={persona.goals} onSave={v => onUpdateField('goals', v)} />
+              <EditableTagRow label="Pain Points" items={persona.pain_points} onSave={v => onUpdateField('pain_points', v)} />
             </Section>
           ) : null}
 
@@ -532,6 +540,85 @@ function TagRow({ label, items }: { label: string; items?: string[] }) {
           <Badge key={i} variant="secondary" className="text-xs">{item}</Badge>
         ))}
       </div>
+    </div>
+  );
+}
+
+function EditableTagRow({ label, items, onSave }: { label: string; items?: string[]; onSave: (items: string[]) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+
+  if (!items?.length && !editing) return null;
+
+  const handleStartEdit = () => {
+    setDraft((items || []).join(', '));
+    setEditing(true);
+  };
+
+  const handleSave = () => {
+    const parsed = draft
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    onSave(parsed);
+    setEditing(false);
+  };
+
+  const handleRemove = (index: number) => {
+    const next = [...(items || [])];
+    next.splice(index, 1);
+    onSave(next);
+  };
+
+  if (editing) {
+    return (
+      <div className="flex items-start gap-2">
+        <span className="text-xs text-muted-foreground w-24 shrink-0 pt-2">{label}</span>
+        <div className="flex-1 space-y-2">
+          <Input
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            placeholder="Comma-separated values"
+            className="text-xs h-8"
+            onKeyDown={e => { if (e.key === 'Enter') handleSave(); }}
+            autoFocus
+          />
+          <div className="flex gap-1">
+            <Button size="sm" variant="default" className="h-6 text-xs px-2" onClick={handleSave}>
+              Save
+            </Button>
+            <Button size="sm" variant="ghost" className="h-6 text-xs px-2" onClick={() => setEditing(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="group flex items-start gap-2">
+      <span className="text-xs text-muted-foreground w-24 shrink-0 pt-0.5">{label}</span>
+      <div className="flex flex-wrap gap-1 flex-1">
+        {(items || []).map((item, i) => (
+          <Badge key={i} variant="secondary" className="text-xs gap-1 pr-1">
+            {item}
+            <button
+              onClick={() => handleRemove(i)}
+              className="ml-0.5 opacity-0 group-hover:opacity-70 hover:!opacity-100 transition-opacity"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        ))}
+      </div>
+      <button
+        onClick={handleStartEdit}
+        className="opacity-0 group-hover:opacity-70 hover:!opacity-100 transition-opacity shrink-0 mt-0.5"
+        title={`Edit ${label.toLowerCase()}`}
+      >
+        <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+      </button>
     </div>
   );
 }
