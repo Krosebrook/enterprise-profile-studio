@@ -36,6 +36,7 @@ const DealAnalyticsPage = lazy(() => import(/* webpackChunkName: "deals" */ '@/p
 const AIPlatformExplorerPage = lazy(() => import(/* webpackChunkName: "ai-explorer" */ '@/pages/AIPlatformExplorerPage'));
 const PersonasListPage = lazy(() => import(/* webpackChunkName: "personas" */ '@/pages/PersonasListPage'));
 const PersonaBuilderPage = lazy(() => import(/* webpackChunkName: "personas" */ '@/pages/PersonaBuilderPage'));
+const PersonaAnalyticsPage = lazy(() => import(/* webpackChunkName: "persona-analytics" */ '@/pages/PersonaAnalyticsPage'));
 const TeamManagementPage = lazy(() => import(/* webpackChunkName: "team" */ '@/pages/TeamManagementPage'));
 const AIPlaybooksPage = lazy(() => import(/* webpackChunkName: "playbooks" */ '@/pages/AIPlaybooksPage'));
 const IntIncProfilePage = lazy(() => import(/* webpackChunkName: "intinc" */ '@/pages/IntIncProfilePage'));
@@ -75,6 +76,7 @@ export function AnimatedRoutes() {
         <Route path="/analytics" element={<LazyRoute Component={AnalyticsDashboardPage} />} />
         <Route path="/personas" element={<LazyRoute Component={PersonasListPage} />} />
         <Route path="/personas/:id" element={<LazyRoute Component={PersonaBuilderPage} />} />
+        <Route path="/personas/analytics" element={<LazyRoute Component={PersonaAnalyticsPage} />} />
         <Route path="/team" element={<LazyRoute Component={TeamManagementPage} />} />
         <Route path="/ai-explorer" element={<LazyRoute Component={AIPlatformExplorerPage} />} />
         <Route path="/ai-playbooks" element={<LazyRoute Component={AIPlaybooksPage} />} />
