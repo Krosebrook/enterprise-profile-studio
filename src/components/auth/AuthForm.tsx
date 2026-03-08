@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Mail, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
