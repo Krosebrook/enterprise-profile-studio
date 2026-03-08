@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Mail, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
@@ -38,8 +39,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         if (error) {
           toast.error(error.message);
         } else {
-          toast.success('Account created successfully!');
-          navigate('/dashboard');
+          toast.success('Check your email to confirm your account before signing in.');
         }
       }
     } finally {
@@ -118,6 +118,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   className="pl-10 border-border/60 focus:border-primary"
                 />
               </div>
+              {mode === 'signup' && <PasswordStrengthIndicator password={password} />}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 pt-2">
@@ -130,6 +131,11 @@ export function AuthForm({ mode }: AuthFormProps) {
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {mode === 'login' ? 'Sign in' : 'Create account'}
             </Button>
+            {mode === 'login' && (
+              <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-accent self-end -mt-2">
+                Forgot password?
+              </Link>
+            )}
             <p className="text-center text-sm text-muted-foreground">
               {mode === 'login' ? (
                 <>

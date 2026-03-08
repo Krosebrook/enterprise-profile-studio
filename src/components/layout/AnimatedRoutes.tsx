@@ -20,6 +20,8 @@ function RouteLoader() {
 const LandingPage = lazy(() => import(/* webpackChunkName: "landing" */ '@/pages/LandingPage'));
 const LoginPage = lazy(() => import(/* webpackChunkName: "auth" */ '@/pages/LoginPage'));
 const SignupPage = lazy(() => import(/* webpackChunkName: "auth" */ '@/pages/SignupPage'));
+const ForgotPasswordPage = lazy(() => import(/* webpackChunkName: "auth" */ '@/pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import(/* webpackChunkName: "auth" */ '@/pages/ResetPasswordPage'));
 const DashboardPage = lazy(() => import(/* webpackChunkName: "dashboard" */ '@/pages/DashboardPage'));
 const ProfileEditPage = lazy(() => import(/* webpackChunkName: "profile" */ '@/pages/ProfileEditPage'));
 const ProfilePreviewPage = lazy(() => import(/* webpackChunkName: "profile" */ '@/pages/ProfilePreviewPage'));
@@ -67,6 +69,8 @@ export function AnimatedRoutes() {
         <Route path="/" element={<LazyRoute Component={LandingPage} />} />
         <Route path="/login" element={<LazyRoute Component={LoginPage} />} />
         <Route path="/signup" element={<LazyRoute Component={SignupPage} />} />
+        <Route path="/forgot-password" element={<LazyRoute Component={ForgotPasswordPage} />} />
+        <Route path="/reset-password" element={<LazyRoute Component={ResetPasswordPage} />} />
         <Route path="/onboarding" element={<LazyRoute Component={OnboardingPage} />} />
         <Route path="/dashboard" element={<LazyRoute Component={DashboardPage} />} />
         <Route path="/deals/compare" element={<LazyRoute Component={DealComparisonPage} />} />
