@@ -6,7 +6,7 @@ function renderIndicator(password: string) {
   const { container } = render(<PasswordStrengthIndicator password={password} />);
   const getByText = (text: string) => {
     const el = Array.from(container.querySelectorAll('*')).find(
-      (node) => node.textContent === text && node.children.length === 0
+      (node: Element) => node.textContent === text && node.children.length === 0
     );
     if (!el) throw new Error(`Unable to find element with text: ${text}`);
     return el;
