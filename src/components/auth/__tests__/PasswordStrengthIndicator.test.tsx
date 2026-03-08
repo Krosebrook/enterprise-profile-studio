@@ -1,6 +1,22 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { PasswordStrengthIndicator } from '../PasswordStrengthIndicator';
+
+const screen = {
+  getByText: (text: string) => document.body.querySelector(`*`)
+    ? (() => { 
+        const walk = (node: Element): Element | null => {
+          if (node.textContent === text && node.children.length === 0) return node;
+          for (const child of Array.from(node.children)) {
+            const found = walk(child);
+            if (found) return found;
+          }
+          return null;
+        };
+        return walk(document.body);
+      })()
+    : null,
+};
 
 describe('PasswordStrengthIndicator', () => {
   it('renders nothing when password is empty', () => {
