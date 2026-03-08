@@ -69,6 +69,8 @@ export function AnimatedRoutes() {
         <Route path="/" element={<LazyRoute Component={LandingPage} />} />
         <Route path="/login" element={<LazyRoute Component={LoginPage} />} />
         <Route path="/signup" element={<LazyRoute Component={SignupPage} />} />
+        <Route path="/forgot-password" element={<LazyRoute Component={ForgotPasswordPage} />} />
+        <Route path="/reset-password" element={<LazyRoute Component={ResetPasswordPage} />} />
         <Route path="/onboarding" element={<LazyRoute Component={OnboardingPage} />} />
         <Route path="/dashboard" element={<LazyRoute Component={DashboardPage} />} />
         <Route path="/deals/compare" element={<LazyRoute Component={DealComparisonPage} />} />
