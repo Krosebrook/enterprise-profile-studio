@@ -20,6 +20,8 @@ function RouteLoader() {
 const LandingPage = lazy(() => import(/* webpackChunkName: "landing" */ '@/pages/LandingPage'));
 const LoginPage = lazy(() => import(/* webpackChunkName: "auth" */ '@/pages/LoginPage'));
 const SignupPage = lazy(() => import(/* webpackChunkName: "auth" */ '@/pages/SignupPage'));
+const ForgotPasswordPage = lazy(() => import(/* webpackChunkName: "auth" */ '@/pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import(/* webpackChunkName: "auth" */ '@/pages/ResetPasswordPage'));
 const DashboardPage = lazy(() => import(/* webpackChunkName: "dashboard" */ '@/pages/DashboardPage'));
 const ProfileEditPage = lazy(() => import(/* webpackChunkName: "profile" */ '@/pages/ProfileEditPage'));
 const ProfilePreviewPage = lazy(() => import(/* webpackChunkName: "profile" */ '@/pages/ProfilePreviewPage'));
